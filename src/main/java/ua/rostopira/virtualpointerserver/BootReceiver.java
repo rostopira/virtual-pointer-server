@@ -8,8 +8,8 @@ public class BootReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())
-            && context.getSharedPreferences("settings",context.MODE_PRIVATE).getBoolean("onBoot",false) )
-                context.startService(new Intent(context, PointerService.class));
+        if ( Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction()) &&
+             context.getSharedPreferences("settings", Context.MODE_PRIVATE).getBoolean("onBoot",false) )
+                 context.startService(new Intent(context, PointerService.class));
     }
 }

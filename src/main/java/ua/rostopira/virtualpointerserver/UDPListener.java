@@ -1,6 +1,8 @@
 package ua.rostopira.virtualpointerserver;
 
 import android.os.AsyncTask;
+import android.util.Log;
+
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
@@ -14,21 +16,22 @@ public class UDPListener extends AsyncTask<Integer, String, Void> {
     void shellInput(String c) {
         try {
             Runtime.getRuntime().exec("input "+c);
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            Log.e("UDPListener", "Shell input failed");
+        }
     }
 
     int range (double x, int r) {
         if (x<0)
             return 0;
-        else if (x>r)
+        if (x>r)
             return r;
-        else
-            return (int) Math.round(x);
+        return (int) Math.round(x);
     }
 
     void calculatexy(String[] s) {
-        x = range( (w/2) + (2 * Math.tan(Double.parseDouble(s[1]))) / w, w);
-        y = range( (h/2) - (2 * Math.tan(Double.parseDouble(s[2]))) / h, h);
+        x = range( (w/2) * (1 + Math.sin(Double.parseDouble(s[1]))), w);
+        y = range( (h/2) * (1 + Math.sin(Double.parseDouble(s[2]))), h);
         xy = " "+Integer.toString(x)+" "+Integer.toString(y);
     }
 
@@ -36,12 +39,16 @@ public class UDPListener extends AsyncTask<Integer, String, Void> {
     protected void onProgressUpdate(String... message) {
         if (message[0].compareTo("M")==0) { //Move cursor
             calculatexy(message);
-            long ts = Long.parseLong(message[3]);
+            String temp = message[3].replace("\n","");
+            long ts = Long.parseLong(temp);
             if (ts>lastTimeStamp) {
                 lastTimeStamp = ts;
                 Singleton.getInstance().pointerService.Update(x,y);
             }
+            return;
         }
+
+        Log.d("UDPListener", "Got " + message[0]);
         if (message[0].compareTo("T")==0) //Tap
             shellInput("tap" + xy);
         if (message[0].compareTo("L")==0) //Long press
@@ -62,15 +69,12 @@ public class UDPListener extends AsyncTask<Integer, String, Void> {
         w = Singleton.getInstance().screenW;
     }
 
-    @Override
-    protected void onCancelled() {
+    protected void stop() {
         running = false;
-        super.onCancelled();
     }
 
     @Override
     protected Void doInBackground(Integer... parameter) {
-        //suShell = new SUShell();
         try {
             DatagramSocket dsocket = new DatagramSocket(parameter[0].intValue());
             byte[] buffer = new byte[2048];
@@ -81,7 +85,9 @@ public class UDPListener extends AsyncTask<Integer, String, Void> {
                 publishProgress(msg.split(" "));
                 packet.setLength(buffer.length);
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            Log.e("UDPListener", "Inet error");
+        }
         return null;
     }
 }
