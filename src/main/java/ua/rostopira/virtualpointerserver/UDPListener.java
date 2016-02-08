@@ -12,10 +12,11 @@ public class UDPListener extends AsyncTask<Integer, String, Void> {
     long lastTimeStamp = 0;
     int x,y,h,w;
     String xy = "";
+    Runtime runtime;
 
-    void shellInput(String c) {
+    void shell(String c) {
         try {
-            Runtime.getRuntime().exec("input "+c);
+            runtime.exec(c);
         } catch (Exception e) {
             Log.e("UDPListener", "Shell input failed");
         }
@@ -50,15 +51,15 @@ public class UDPListener extends AsyncTask<Integer, String, Void> {
 
         Log.d("UDPListener", "Got " + message[0]);
         if (message[0].compareTo("T")==0) //Tap
-            shellInput("tap" + xy);
+            shell("input tap" + xy);
         if (message[0].compareTo("L")==0) //Long press
-            shellInput("swipe" + xy + xy + " " + Singleton.getInstance().longPress);
+            shell("input swipe" + xy + xy + " " + Singleton.getInstance().longPress);
         if (message[0].compareTo("B")==0) //Back press
-            shellInput("keypress 4");
+            shell("input keyevent 4");
         if (message[0].compareTo("H")==0) //Home press
-            shellInput("keypress 3");
+            shell("input keyevent 3");
         if (message[0].compareTo("RA")==0) //Recent apps press
-            shellInput("keypress 187");
+            shell("input keyevent 187");
     }
 
     @Override
@@ -67,6 +68,7 @@ public class UDPListener extends AsyncTask<Integer, String, Void> {
         running = true;
         h = Singleton.getInstance().screenH;
         w = Singleton.getInstance().screenW;
+        runtime = Runtime.getRuntime();
     }
 
     protected void stop() {

@@ -16,39 +16,26 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
-/* @project
- * License to access, copy or distribute this file.
- * This file or any portions of it, is Copyright (C) 2012, Radu Motisan ,  http://www.pocketmagic.net . All rights reserved.
+/**
+ * This file or any portions of it, is Copyright (C) 2012, Radu Motisan
+ * http://www.pocketmagic.net . All rights reserved.
  * @author Radu Motisan, radu.motisan@gmail.com
- *
- * This file is protected by copyright law and international treaties. Unauthorized access, reproduction
- * or distribution of this file or any portions of it may result in severe civil and criminal penalties.
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *
- * @purpose
- * Cursor Overlay Sample
- * (C) 2012 Radu Motisan , all rights reserved.
  */
 
 public class PointerService extends Service {
     OverlayView mView;
     UDPListener listener;
+    CountDownTimer timer;
 
     //Timer for autohide cursor when unused
-    CountDownTimer timer = new CountDownTimer(5000,5000) {
-        @Override public void onTick(long l) {}
-        @Override public void onFinish() {
-            mView.mShowCursor = false;
-        }
-    };
 
     public void Update(final int x, final int y) {
         Log.d("PointerService", "Updating cursor position. X = " + Integer.toString(x) +
                 "\nY = " + Integer.toString(y));
-        timer.cancel(); timer.start(); //Packet received => timer reset
+        //Packet received => timer reset
+        mView.mShowCursor = true;
+        timer.cancel();
+        timer.start();
         mView.Update(x, y);
         mView.postInvalidate();
     }
@@ -84,6 +71,14 @@ public class PointerService extends Service {
         Singleton.getInstance().screenW = metrics.widthPixels;
         Singleton.getInstance().longPress = Integer.toString(ViewConfiguration.getLongPressTimeout());
 
+        timer = new CountDownTimer(5000, 5000) {
+            @Override public void onTick(long l) {}
+            @Override public void onFinish() {
+                mView.mShowCursor = false;
+            }
+        };
+        timer.start();
+
         Log.d("PointerService", "Starting UDPListener");
         listener = new UDPListener();
         listener.execute(6969);
@@ -109,7 +104,6 @@ class OverlayView extends ViewGroup {
     public int x = 0,y = 0;
 
     public void Update(int nx, int ny) {
-        mShowCursor = true;
         x = nx;
         y = ny;
     }
@@ -125,8 +119,8 @@ class OverlayView extends ViewGroup {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        canvas.drawText("▶", x, y, mLoadPaint); //Who needs picture?
-        //Maybe should add unicode version to requirements? :D
+        if (mShowCursor)
+            canvas.drawText("▶", x, y, mLoadPaint); //Who needs picture? Keep It Simple Stupid
     }
 
     @Override
