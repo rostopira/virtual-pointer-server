@@ -27,8 +27,6 @@ public class PointerService extends Service {
     UDPListener listener;
     CountDownTimer timer;
 
-    //Timer for autohide cursor when unused
-
     public void Update(final int x, final int y) {
         Log.d("PointerService", "Updating cursor position. X = " + Integer.toString(x) +
                 "\nY = " + Integer.toString(y));
