@@ -16,7 +16,7 @@ public class UDPListener extends AsyncTask<Integer, String, Void> {
 
     void shell(String c) {
         try {
-            runtime.exec(c);
+            runtime.exec(c+"\n");
         } catch (Exception e) {
             Log.e("UDPListener", "Shell input failed");
         }

@@ -12,15 +12,9 @@ import android.os.IBinder;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.View;
 import android.view.ViewConfiguration;
-import android.view.ViewGroup;
 import android.view.WindowManager;
-
-/**
- * This file or any portions of it, is Copyright (C) 2012, Radu Motisan
- * http://www.pocketmagic.net . All rights reserved.
- * @author Radu Motisan, radu.motisan@gmail.com
- */
 
 public class PointerService extends Service {
     OverlayView mView;
@@ -30,7 +24,6 @@ public class PointerService extends Service {
     public void Update(final int x, final int y) {
         Log.d("PointerService", "Updating cursor position. X = " + Integer.toString(x) +
                 "\nY = " + Integer.toString(y));
-        //Packet received => timer reset
         mView.mShowCursor = true;
         timer.cancel();
         timer.start();
@@ -49,25 +42,21 @@ public class PointerService extends Service {
         Singleton.getInstance().pointerService = this;
         Log.d("PointerService", "Creating service");
 
-        mView = new OverlayView(this);
-        WindowManager.LayoutParams params = new WindowManager.LayoutParams(
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE |
-                        WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN, //will cover status bar as well
-                PixelFormat.TRANSLUCENT);
-        params.gravity = Gravity.TOP | Gravity.LEFT;
-        params.setTitle("Cursor");
         WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
-        wm.addView(mView, params);
-
-        //Get display resolution
         DisplayMetrics metrics = new DisplayMetrics();
         wm.getDefaultDisplay().getMetrics(metrics);
-        Singleton.getInstance().screenH = metrics.heightPixels;
-        Singleton.getInstance().screenW = metrics.widthPixels;
-        Singleton.getInstance().longPress = Integer.toString(ViewConfiguration.getLongPressTimeout());
+
+        mView = new OverlayView(this);
+        WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+                1280, 720, //Temporary workaround. TODO: FIX ME
+                WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE |
+                WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                PixelFormat.TRANSPARENT);
+        params.gravity = Gravity.TOP | Gravity.LEFT;
+        params.setTitle("Cursor");
+        wm.addView(mView, params);
 
         timer = new CountDownTimer(5000, 5000) {
             @Override public void onTick(long l) {}
@@ -81,6 +70,9 @@ public class PointerService extends Service {
         listener = new UDPListener();
         listener.execute(6969);
         Log.d("PointerService", "Service created");
+        Singleton.getInstance().screenH = metrics.heightPixels;
+        Singleton.getInstance().screenW = metrics.widthPixels;
+        Singleton.getInstance().longPress = Integer.toString(ViewConfiguration.getLongPressTimeout());
     }
 
     @Override
@@ -96,7 +88,7 @@ public class PointerService extends Service {
     }
 }
 
-class OverlayView extends ViewGroup {
+class OverlayView extends View {
     private Paint mLoadPaint;
     public boolean mShowCursor;
     public int x = 0,y = 0;
@@ -109,8 +101,6 @@ class OverlayView extends ViewGroup {
     public OverlayView(Context context) {
         super(context);
         mLoadPaint = new Paint();
-        //TODO: add size and color chooser to MainActivity
-        mLoadPaint.setTextSize(100);
         mLoadPaint.setColor(Color.MAGENTA);
     }
 
@@ -118,7 +108,7 @@ class OverlayView extends ViewGroup {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         if (mShowCursor)
-            canvas.drawText("▶", x, y, mLoadPaint); //Who needs picture? Keep It Simple Stupid
+            canvas.drawCircle(x,y,20,mLoadPaint); //TODO: replace dot with cursor
     }
 
     @Override
