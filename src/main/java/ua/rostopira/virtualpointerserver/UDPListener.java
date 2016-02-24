@@ -2,12 +2,10 @@ package ua.rostopira.virtualpointerserver;
 
 import android.os.AsyncTask;
 import android.util.Log;
-
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
 public class UDPListener extends AsyncTask<Integer, String, Void> {
-
     boolean running;
     long lastTimeStamp = 0;
     int x,y,h,w;
@@ -66,8 +64,8 @@ public class UDPListener extends AsyncTask<Integer, String, Void> {
     protected void onPreExecute() {
         super.onPreExecute();
         running = true;
-        h = Singleton.getInstance().screenH;
-        w = Singleton.getInstance().screenW;
+        h = Singleton.getInstance().screenSize.y;
+        w = Singleton.getInstance().screenSize.x;
         runtime = Runtime.getRuntime();
     }
 

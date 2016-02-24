@@ -7,9 +7,9 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.os.CountDownTimer;
 import android.os.IBinder;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -28,7 +28,6 @@ public class PointerService extends Service {
         timer.cancel();
         timer.start();
         mView.Update(x, y);
-        mView.postInvalidate();
     }
 
     @Override
@@ -43,12 +42,15 @@ public class PointerService extends Service {
         Log.d("PointerService", "Creating service");
 
         WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
-        DisplayMetrics metrics = new DisplayMetrics();
-        wm.getDefaultDisplay().getMetrics(metrics);
+        Point screenSize = new Point();
+        wm.getDefaultDisplay().getRealSize(screenSize); //Yeah, that's why I support only 4.2+
+        //Just joking. I support only 4.2+, because the first Android HDMI stick used 4.2.2,
+        //and almost all of them currently updated to KitKat
+        //Have an older version of Android? Really? Use CM or just throw out that mammoth shit
 
         mView = new OverlayView(this);
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(
-                1280, 720, //Temporary workaround. TODO: FIX ME
+                screenSize.x, screenSize.y,
                 WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
                 WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE |
@@ -66,13 +68,12 @@ public class PointerService extends Service {
         };
         timer.start();
 
+        Singleton.getInstance().screenSize = screenSize;
+        Singleton.getInstance().longPress = Integer.toString(ViewConfiguration.getLongPressTimeout());
         Log.d("PointerService", "Starting UDPListener");
         listener = new UDPListener();
         listener.execute(6969);
         Log.d("PointerService", "Service created");
-        Singleton.getInstance().screenH = metrics.heightPixels;
-        Singleton.getInstance().screenW = metrics.widthPixels;
-        Singleton.getInstance().longPress = Integer.toString(ViewConfiguration.getLongPressTimeout());
     }
 
     @Override
@@ -86,35 +87,38 @@ public class PointerService extends Service {
         }
         listener.stop();
     }
+
+    /**
+     * Long time ago there was some code from pocketmagic.com
+     * And that was horrible shit
+     * So I rewrote it
+     * But thanks for idea
+     */
+
+    class OverlayView extends View {
+        private Paint mLoadPaint;
+        public boolean mShowCursor;
+        public int x = 0,y = 0;
+
+        public void Update(int nx, int ny) {
+            x = nx;
+            y = ny;
+            postInvalidate();
+        }
+
+        public OverlayView(Context context) {
+            super(context);
+            mLoadPaint = new Paint();
+            mLoadPaint.setColor(Color.MAGENTA);
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            super.onDraw(canvas);
+            if (mShowCursor)
+                canvas.drawCircle(x,y,20,mLoadPaint); //TODO: replace dot with cursor
+        }
+    }
+
 }
 
-class OverlayView extends View {
-    private Paint mLoadPaint;
-    public boolean mShowCursor;
-    public int x = 0,y = 0;
-
-    public void Update(int nx, int ny) {
-        x = nx;
-        y = ny;
-    }
-
-    public OverlayView(Context context) {
-        super(context);
-        mLoadPaint = new Paint();
-        mLoadPaint.setColor(Color.MAGENTA);
-    }
-
-    @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-        if (mShowCursor)
-            canvas.drawCircle(x,y,20,mLoadPaint); //TODO: replace dot with cursor
-    }
-
-    @Override
-    protected void onLayout(boolean arg0, int arg1, int arg2, int arg3, int arg4) {
-        //I don't know, what must be here
-        //If I don't know what is it - than I don't need it at all
-    }
-
-}

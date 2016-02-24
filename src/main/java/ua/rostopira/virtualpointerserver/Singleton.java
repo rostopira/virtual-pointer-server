@@ -1,6 +1,7 @@
 package ua.rostopira.virtualpointerserver;
 
 import android.app.Application;
+import android.graphics.Point;
 
 /* @project
  *
@@ -23,8 +24,7 @@ import android.app.Application;
 public class Singleton extends Application {
     private static Singleton m_Instance;
     public String longPress = "500";
-    public int screenW = 1280, screenH = 720;
-    public MainActivity m_guiInst = null;
+    public Point screenSize;
     public PointerService pointerService = null;
 
     public Singleton() {
