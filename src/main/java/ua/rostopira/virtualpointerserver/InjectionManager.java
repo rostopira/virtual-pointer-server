@@ -116,11 +116,9 @@ public class InjectionManager
 
     public void injectKeyPress(int keycode) {
         KeyEvent ke = new KeyEvent(KeyEvent.ACTION_DOWN, keycode);
-        ke.setSource(InputDevice.SOURCE_KEYBOARD);
         injectEvent(ke, EVENT_MODE_WAIT_FOR_RESULT);
-        ke = new KeyEvent(KeyEvent.ACTION_UP, keycode);
-        ke.setSource(InputDevice.SOURCE_KEYBOARD);
-        injectEvent(ke, EVENT_MODE_WAIT_FOR_RESULT);
+        KeyEvent ke2 = new KeyEvent(KeyEvent.ACTION_UP, keycode);
+        injectEvent(ke2, EVENT_MODE_WAIT_FOR_RESULT);
     }
 
     private void injectEvent(InputEvent ie, int mode)
