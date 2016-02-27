@@ -21,21 +21,22 @@ import android.graphics.Point;
  * (C) 2012 Radu Motisan , all rights reserved.
  */
 
-public class Singleton extends Application {
-    private static Singleton m_Instance;
+public class S extends Application {
+    private static S m_Instance;
     public String longPress = "500";
     public Point screenSize;
-    public PointerService pointerService = null;
+    public PointerService pointerService;
+    public InjectionManager injectionManager;
 
-    public Singleton() {
+    public S() {
         super();
         m_Instance = this;
     }
     // Double-checked singleton fetching
-    public static Singleton getInstance() {
+    public static S get() {
         if(m_Instance == null) {
-            synchronized(Singleton.class) {
-                if(m_Instance == null) new Singleton();
+            synchronized(S.class) {
+                if(m_Instance == null) new S();
             }
         }
         return m_Instance;

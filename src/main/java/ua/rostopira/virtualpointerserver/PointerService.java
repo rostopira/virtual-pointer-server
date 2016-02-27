@@ -12,7 +12,6 @@ import android.graphics.Point;
 import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
@@ -24,7 +23,7 @@ public class PointerService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Singleton.getInstance().pointerService = this;
+        S.get().pointerService = this;
         Log.d("PointerService", "Creating service");
 
         WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
@@ -41,12 +40,12 @@ public class PointerService extends Service {
                         WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE |
                         WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 PixelFormat.TRANSPARENT);
-        params.gravity = Gravity.TOP | Gravity.LEFT;
-        params.setTitle("Cursor");
+        //params.gravity = Gravity.TOP | Gravity.LEFT;
+        //params.setTitle("Cursor");
         wm.addView(overlayView, params);
 
-        Singleton.getInstance().screenSize = screenSize;
-        Singleton.getInstance().longPress = Integer.toString(ViewConfiguration.getLongPressTimeout());
+        S.get().screenSize = screenSize;
+        S.get().longPress = Integer.toString(ViewConfiguration.getLongPressTimeout());
         Log.d("PointerService", "Starting UDPListener");
         listener = new UDPListener();
         listener.execute(6969);
@@ -54,8 +53,6 @@ public class PointerService extends Service {
     }
 
     public void Update(final int x, final int y) {
-        Log.d("PointerService", "Updating cursor position. X = " + Integer.toString(x) +
-                "\nY = " + Integer.toString(y));
         overlayView.Update(x, y);
     }
 
@@ -63,7 +60,7 @@ public class PointerService extends Service {
     public void onDestroy() {
         super.onDestroy();
         Log.d("CursorService", "Service destroyed");
-        Singleton.getInstance().pointerService = null;
+        S.get().pointerService = null;
         if(overlayView != null) {
             ((WindowManager) getSystemService(WINDOW_SERVICE)).removeView(overlayView);
             overlayView = null;
