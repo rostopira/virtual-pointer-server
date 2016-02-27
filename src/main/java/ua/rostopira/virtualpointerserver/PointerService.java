@@ -52,10 +52,6 @@ public class PointerService extends Service {
         Log.d("PointerService", "Service created");
     }
 
-    public void Update(final int x, final int y) {
-        overlayView.Update(x, y);
-    }
-
     @Override
     public void onDestroy() {
         super.onDestroy();

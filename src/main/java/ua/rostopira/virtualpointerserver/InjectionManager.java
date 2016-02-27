@@ -13,9 +13,7 @@ import android.view.MotionEvent;
 
 /**
  * InjectionManager is main class for injection InputEvents.
- *
  * The class uses internal APIs to inject. Injection depends on android.permission.INJECT_EVENTS.
- *
  * @author Anders Bo Pedersen, ABP Consult Aps, 2013
  */
 public class InjectionManager
@@ -145,12 +143,4 @@ public class InjectionManager
         }
     }
 
-    private void printDeclaredMethods(Class c)
-    {
-        Method[] methods = c.getDeclaredMethods();
-        for(Method m : methods)
-        {
-            Log.d(TAG, "InputManager method: "+m.getName());
-        }
-    }
 }

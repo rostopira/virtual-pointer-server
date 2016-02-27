@@ -8,31 +8,25 @@ import java.net.DatagramSocket;
 
 public class UDPListener extends AsyncTask<Integer, String, Void> {
     boolean running, pressed;
-    long lastTimeStamp = 0;
     int x,y,h,w;
 
     void calculatexy(String[] s) {
-        x = (int) Math.round((w/2) * (1 + Math.sin(Double.parseDouble(s[1]))));
-        y = (int) Math.round((h/2) * (1 + Math.sin(Double.parseDouble(s[2]))));
+        x += (int) Math.round(w*Math.sin(Double.parseDouble(s[1])));
+        x = (x < 0) ? 0 : (x > w) ? w : x;
+        y += (int) Math.round(h*Math.sin(Double.parseDouble(s[2])));
+        y = (y < 0) ? 0 : (y > h) ? h : y;
     }
 
     @Override
     protected void onProgressUpdate(String... message) {
-        if (message[0].compareTo("M")==0) { //Move cursor
-            calculatexy(message);
-            String temp = message[3].replace("\n",""); //TODO: clean this mess with "\n"
-            long ts = Long.parseLong(temp);
-            if (ts>lastTimeStamp) {
-                lastTimeStamp = ts;
-                S.get().pointerService.Update(x,y);
-            }
-            if (pressed)
-                S.get().injectionManager.injectMove(x,y);
-            return;
-        }
-
         Log.d("Message parser", "Got " + message[0]);
         switch (message[0].charAt(0)) {
+            case 'M':
+                calculatexy(message);
+                S.get().pointerService.overlayView.Update(x,y);
+                if (pressed)
+                    S.get().injectionManager.injectMove(x,y);
+                return;
             case 'T': //press
                 S.get().injectionManager.injectTouchEventDown(x,y);
                 pressed = true;
@@ -50,6 +44,10 @@ public class UDPListener extends AsyncTask<Integer, String, Void> {
                 S.get().injectionManager.injectTouchEventRelease(x,y);
                 pressed = false;
                 return;
+            case 'C':
+                x = w / 2;
+                y = h / 2;
+                return;
             default: //wtf?
                 Log.e("Message parser", "Message missed");
         }
@@ -62,6 +60,8 @@ public class UDPListener extends AsyncTask<Integer, String, Void> {
         pressed = false;
         h = S.get().screenSize.y;
         w = S.get().screenSize.x;
+        x = w / 2;
+        y = h / 2;
     }
 
     protected void stop() {
