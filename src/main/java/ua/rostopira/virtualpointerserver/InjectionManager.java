@@ -121,6 +121,15 @@ public class InjectionManager
         injectEvent(ke2, EVENT_MODE_WAIT_FOR_RESULT);
     }
 
+    public void injectMouseBtn(int mouseBtn) {
+        MotionEvent me = MotionEvent.obtain(
+                SystemClock.uptimeMillis(),
+                SystemClock.uptimeMillis()+10,
+                mouseBtn,
+                0, 0, 0
+        );
+    }
+
     private void injectEvent(InputEvent ie, int mode)
     {
         try

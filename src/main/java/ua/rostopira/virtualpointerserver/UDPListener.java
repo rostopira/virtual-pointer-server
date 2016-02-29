@@ -3,6 +3,7 @@ package ua.rostopira.virtualpointerserver;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.KeyEvent;
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
@@ -32,7 +33,8 @@ public class UDPListener extends AsyncTask<Integer, String, Void> {
                 pressed = true;
                 return;
             case 'B': //back
-                S.get().injectionManager.injectKeyPress(KeyEvent.KEYCODE_BACK);
+                try { Runtime.getRuntime().exec("input keyevent 4"); }
+                catch (IOException e) { Log.e("Message parser","I/O Exception"); }
                 return;
             case 'H': //home
                 S.get().injectionManager.injectKeyPress(KeyEvent.KEYCODE_HOME);
