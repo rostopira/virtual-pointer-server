@@ -27,13 +27,6 @@ public class MainActivity extends AppCompatActivity {
             cb.setChecked(true);
         }
 
-        //Get input service. If fail - make app system
-        S.get().injectionManager = new InjectionManager(this);
-        if (!S.get().injectionManager.gotService) {
-            makeAppSystem();
-            return;
-        }
-
         //Marshmallow permission system support
         if ( (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) ) {
             requestOverlayPermission();
@@ -41,15 +34,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         startService(new Intent(this, PointerService.class));
-    }
-
-    /**
-     * This method moves this app to system using root permissions and then reboots.
-     * Root required only on first start of the program or if new version installed.
-     */
-    public void makeAppSystem() {
-        Log.e("makeAppSystem", "making app system");
-        //TODO
     }
 
     public static int REQUEST_OVERLAY_PERMISSION = 7657;

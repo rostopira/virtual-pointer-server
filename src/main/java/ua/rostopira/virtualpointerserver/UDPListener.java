@@ -51,7 +51,7 @@ public class UDPListener extends AsyncTask<Integer, String, Void> {
                 y = h / 2;
                 return;
             default: //wtf?
-                Log.e("Message parser", "Message missed");
+                Log.e("Message parser", "Message missed: " + message[0]);
         }
     }
 
