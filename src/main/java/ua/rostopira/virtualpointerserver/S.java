@@ -23,10 +23,9 @@ import android.graphics.Point;
 
 public class S extends Application {
     private static S m_Instance;
-    public String longPress = "500";
+    public String longPress = " 500";
     public Point screenSize;
     public PointerService pointerService;
-    public InjectionManager injectionManager;
 
     public S() {
         super();

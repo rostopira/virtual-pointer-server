@@ -24,7 +24,6 @@ public class PointerService extends Service {
     public void onCreate() {
         super.onCreate();
         S.get().pointerService = this;
-        S.get().injectionManager = new InjectionManager(this);
 
         WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
         Point screenSize = new Point();
@@ -43,7 +42,7 @@ public class PointerService extends Service {
         wm.addView(overlayView, params);
 
         S.get().screenSize = screenSize;
-        S.get().longPress = Integer.toString(ViewConfiguration.getLongPressTimeout());
+        S.get().longPress = ' ' + Integer.toString(ViewConfiguration.getLongPressTimeout());
         listener = new UDPListener();
         listener.execute(6969);
     }

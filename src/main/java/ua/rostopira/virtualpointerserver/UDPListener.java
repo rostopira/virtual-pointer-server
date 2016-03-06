@@ -2,20 +2,30 @@ package ua.rostopira.virtualpointerserver;
 
 import android.os.AsyncTask;
 import android.util.Log;
-import android.view.KeyEvent;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
 public class UDPListener extends AsyncTask<Integer, String, Void> {
-    boolean running, pressed;
-    int x,y,h,w;
+    private int x,y,h,w;
+    private boolean running;
+    private String xy;
 
-    void calculatexy(String[] s) {
+    private void calculatexy(String[] s) {
         x += (int) Math.round(w*Math.sin(Double.parseDouble(s[1])));
         x = (x < 0) ? 0 : (x > w) ? w : x;
         y += (int) Math.round(h*Math.sin(Double.parseDouble(s[2])));
         y = (y < 0) ? 0 : (y > h) ? h : y;
+        xy = ' ' + String.valueOf(x) + ' ' + String.valueOf(y);
+    }
+
+    private void SUInput(String s) {
+        try {
+            Runtime.getRuntime().exec( new String[] {"su", "-c", s } );
+        } catch (IOException e) {
+            Log.e("Message parser","I/O Exception");
+            Log.e("Message:", s);
+        }
     }
 
     @Override
@@ -25,30 +35,19 @@ public class UDPListener extends AsyncTask<Integer, String, Void> {
             case 'M':
                 calculatexy(message);
                 S.get().pointerService.overlayView.Update(x,y);
-                if (pressed)
-                    S.get().injectionManager.injectMove(x,y);
                 return;
             case 'T': //press
-                S.get().injectionManager.injectTouchEventDown(x,y);
-                pressed = true;
+                SUInput("input tap" + xy);
                 return;
-            case 'B': //back
-                try { Runtime.getRuntime().exec("input keyevent 4"); }
-                catch (IOException e) { Log.e("Message parser","I/O Exception"); }
+            case 'L': //longpress
+                SUInput("input swipe" + xy + xy + S.get().longPress);
                 return;
-            case 'H': //home
-                S.get().injectionManager.injectKeyPress(KeyEvent.KEYCODE_HOME);
-                return;
-            case 'A': //app switch
-                S.get().injectionManager.injectKeyPress(KeyEvent.KEYCODE_APP_SWITCH);
-                return;
-            case 'R': //release
-                S.get().injectionManager.injectTouchEventRelease(x,y);
-                pressed = false;
-                return;
-            case 'C':
+            case 'C': //center
                 x = w / 2;
                 y = h / 2;
+                return;
+            case 'K': //custom key
+                SUInput("input keyevent " + message[1]);
                 return;
             default: //wtf?
                 Log.e("Message parser", "Message missed: " + message[0]);
@@ -59,7 +58,6 @@ public class UDPListener extends AsyncTask<Integer, String, Void> {
     protected void onPreExecute() {
         super.onPreExecute();
         running = true;
-        pressed = false;
         h = S.get().screenSize.y;
         w = S.get().screenSize.x;
         x = w / 2;
