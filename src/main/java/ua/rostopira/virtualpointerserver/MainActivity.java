@@ -13,8 +13,8 @@ import android.view.View;
 import android.widget.CheckBox;
 
 public class MainActivity extends AppCompatActivity {
-
-    SharedPreferences prefs;
+    private SharedPreferences prefs;
+    private final static int REQUEST_OVERLAY_PERMISSION = 7657;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,8 +35,6 @@ public class MainActivity extends AppCompatActivity {
 
         startService(new Intent(this, PointerService.class));
     }
-
-    public static int REQUEST_OVERLAY_PERMISSION = 7657;
 
     @TargetApi(23)
     public void requestOverlayPermission() {

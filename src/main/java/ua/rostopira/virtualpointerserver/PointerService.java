@@ -17,8 +17,8 @@ import android.view.ViewConfiguration;
 import android.view.WindowManager;
 
 public class PointerService extends Service {
-    OverlayView overlayView;
-    UDPListener listener;
+    public OverlayView overlayView;
+    private UDPListener listener;
 
     @Override
     public void onCreate() {
@@ -63,7 +63,7 @@ public class PointerService extends Service {
      * Long time ago there was some code from pocketmagic.com
      * And that was horrible, so I fully rewrote it
      */
-    class OverlayView extends View {
+    protected class OverlayView extends View {
         boolean showCursor;
         int x = 0,y = 0;
         CountDownTimer timer;

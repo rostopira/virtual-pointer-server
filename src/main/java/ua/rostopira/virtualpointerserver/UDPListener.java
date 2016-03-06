@@ -77,7 +77,17 @@ public class UDPListener extends AsyncTask<Integer, String, Void> {
             while (running) {
                 dsocket.receive(packet);
                 String msg = new String(buffer, 0, packet.getLength());
-                publishProgress(msg.split(" "));
+                if (msg.charAt(0)=='B') {
+                    //Detected client broadcast. Let him know, about running server here
+                    byte[] answer = "VPS here!".getBytes();
+                    dsocket.send(new DatagramPacket(
+                            answer,
+                            answer.length,
+                            packet.getAddress(),
+                            parameter[0].intValue())
+                    );
+                } else
+                    publishProgress(msg.split(" "));
                 packet.setLength(buffer.length);
             }
         } catch (Exception e) {
