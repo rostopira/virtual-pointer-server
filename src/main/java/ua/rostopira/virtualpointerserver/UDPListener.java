@@ -6,93 +6,104 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
-public class UDPListener extends AsyncTask<Integer, String, Void> {
-    private int x,y,h,w;
-    private boolean running;
-    private String xy;
-
-    private void calculatexy(String[] s) {
-        x += (int) Math.round(w*Math.sin(Double.parseDouble(s[1])));
-        x = (x < 0) ? 0 : (x > w) ? w : x;
-        y += (int) Math.round(h*Math.sin(Double.parseDouble(s[2])));
-        y = (y < 0) ? 0 : (y > h) ? h : y;
-        xy = ' ' + String.valueOf(x) + ' ' + String.valueOf(y);
-    }
-
-    private void SUInput(String s) {
-        try {
-            Runtime.getRuntime().exec( new String[] {"su", "-c", s } );
-        } catch (IOException e) {
-            Log.e("Message parser","I/O Exception");
-            Log.e("Message:", s);
-        }
-    }
-
-    @Override
-    protected void onProgressUpdate(String... message) {
-        Log.d("Message parser", "Got " + message[0]);
-        switch (message[0].charAt(0)) {
-            case 'M':
-                calculatexy(message);
-                S.get().pointerService.overlayView.Update(x,y);
-                return;
-            case 'T': //press
-                SUInput("input tap" + xy);
-                return;
-            case 'L': //longpress
-                SUInput("input swipe" + xy + xy + S.get().longPress);
-                return;
-            case 'C': //center
-                x = w / 2;
-                y = h / 2;
-                return;
-            case 'K': //custom key
-                SUInput("input keyevent " + message[1]);
-                return;
-            default: //wtf?
-                Log.e("Message parser", "Message missed: " + message[0]);
-        }
-    }
+/**
+ * Listens for commands from client and does, what they say
+ * Maybe should move message parse and commands execution to another file?
+ */
+public class UDPListener extends AsyncTask<Void, String, Void> {
+    private int x, y,
+                h, w; //screen size
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        running = true;
         h = S.get().screenSize.y;
         w = S.get().screenSize.x;
         x = w / 2;
         y = h / 2;
     }
 
-    protected void stop() {
-        running = false;
-    }
-
     @Override
-    protected Void doInBackground(Integer... parameter) {
+    protected Void doInBackground(Void... voids) {
         try {
-            DatagramSocket dsocket = new DatagramSocket(parameter[0].intValue());
-            byte[] buffer = new byte[2048];
+            DatagramSocket socket = new DatagramSocket();
+            byte[] buffer = new byte[1024];
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-            while (running) {
-                dsocket.receive(packet);
+            while (!isCancelled()) {
+                socket.receive(packet);
                 String msg = new String(buffer, 0, packet.getLength());
                 if (msg.charAt(0)=='B') {
                     //Detected client broadcast. Let him know, about running server here
                     byte[] answer = "VPS here!".getBytes();
-                    dsocket.send(new DatagramPacket(
+                    socket.send(new DatagramPacket(
                             answer,
                             answer.length,
                             packet.getAddress(),
-                            parameter[0].intValue())
+                            S.port)
                     );
                 } else
                     publishProgress(msg.split(" "));
                 packet.setLength(buffer.length);
             }
+            socket.close();
         } catch (Exception e) {
             Log.e("UDPListener", "Inet error");
         }
         return null;
+    }
+
+    /**
+     * Simple message parser. No encryption, or anything else
+     * Just a letter and numbers. KISS
+     */
+    @Override
+    protected void onProgressUpdate(String... message) {
+        Log.d("Message parser", "Got " + message[0]);
+        switch (message[0].charAt(0)) {
+            case 'M': //move
+                x += (int) Math.round(w*Math.sin(Double.parseDouble(message[1])));
+                y += (int) Math.round(h*Math.sin(Double.parseDouble(message[2])));
+                S.get().pointerService.overlayView.Update(x,y);
+                return;
+            case 'T': //tap
+                SUInput("tap " + xy());
+                return;
+            case 'L': //longpress
+                SUInput(String.format("swipe %s %s %d", xy(), xy(), S.get().longPress));
+                return;
+            case 'C': //center
+                x = w / 2;
+                y = h / 2;
+                return;
+            case 'K': //custom key
+                SUInput("keyevent " + message[1]);
+                return;
+            default: //wtf?
+                Log.e("Message parser", "Message missed: " + message[0]);
+        }
+    }
+
+    /**
+     * Just to make code above more simple.
+     * Formats x and y to string with space as seperator
+     * Also, checks, if values in screen bounds.
+     */
+    private String xy() {
+        int X = (x < 0) ? 0 : (x > w) ? w : x;
+        int Y = (y < 0) ? 0 : (y > h) ? h : y;
+        return String.format("%d %d", X, Y);
+    }
+
+    /**
+     * The simplest way to inject input events using root.
+     * No gestures support. But it's for TV! Who cares?
+     */
+    private void SUInput(String s) {
+        try {
+            Runtime.getRuntime().exec( new String[] {"su", "-c", "input " + s } );
+        } catch (IOException e) {
+            Log.e("Message parser","I/O Exception");
+            Log.e("Message:", s);
+        }
     }
 }

@@ -19,6 +19,7 @@ import android.view.WindowManager;
 public class PointerService extends Service {
     public OverlayView overlayView;
     private UDPListener listener;
+    private Point screenSize = new Point();
 
     @Override
     public void onCreate() {
@@ -26,10 +27,8 @@ public class PointerService extends Service {
         S.get().pointerService = this;
 
         WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
-        Point screenSize = new Point();
         wm.getDefaultDisplay().getRealSize(screenSize); //Yeah, that's why I support only 4.2+
-        //Just joking. I support only 4.2+, because the first Android HDMI stick used 4.2.2,
-        //Have an older version of Android? Really? Flash CM or just throw away that mammoth shit
+        //Just joking. I support only 4.2+, because the first Android HDMI stick was with 4.2.2
 
         overlayView = new OverlayView(this);
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(
@@ -42,9 +41,9 @@ public class PointerService extends Service {
         wm.addView(overlayView, params);
 
         S.get().screenSize = screenSize;
-        S.get().longPress = ' ' + Integer.toString(ViewConfiguration.getLongPressTimeout());
+        S.get().longPress = ViewConfiguration.getLongPressTimeout();
         listener = new UDPListener();
-        listener.execute(6969);
+        listener.execute();
     }
 
     @Override
@@ -52,11 +51,8 @@ public class PointerService extends Service {
         super.onDestroy();
         Log.d("CursorService", "Service destroyed");
         S.get().pointerService = null;
-        if(overlayView != null) {
-            ((WindowManager) getSystemService(WINDOW_SERVICE)).removeView(overlayView);
-            overlayView = null;
-        }
-        listener.stop();
+        listener.cancel(false);
+        ((WindowManager) getSystemService(WINDOW_SERVICE)).removeView(overlayView);
     }
 
     /**
@@ -64,9 +60,9 @@ public class PointerService extends Service {
      * And that was horrible, so I fully rewrote it
      */
     protected class OverlayView extends View {
-        boolean showCursor;
-        int x = 0,y = 0;
-        CountDownTimer timer;
+        private boolean showCursor;
+        private int x, y;
+        CountDownTimer timer; //for autohide
         Bitmap cursor;
         Paint paint;
 
@@ -88,8 +84,8 @@ public class PointerService extends Service {
             showCursor = true;
             timer.cancel();
             timer.start();
-            x = X;
-            y = Y;
+            x = (X < 0) ? 0 : (x > screenSize.x) ? screenSize.x : x;
+            y = (Y < 0) ? 0 : (y > screenSize.y) ? screenSize.y : y;
             postInvalidate();
         }
 

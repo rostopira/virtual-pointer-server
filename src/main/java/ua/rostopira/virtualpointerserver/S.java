@@ -3,9 +3,13 @@ package ua.rostopira.virtualpointerserver;
 import android.app.Application;
 import android.graphics.Point;
 
-public class S extends Application { // Singleton
+/**
+ * Singleton
+ */
+public class S extends Application {
     private static S instance;
-    public String longPress = " 500";
+    public static final int port = 6969;
+    public int longPress;
     public Point screenSize;
     public PointerService pointerService;
 

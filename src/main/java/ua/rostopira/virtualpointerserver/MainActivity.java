@@ -8,13 +8,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
     private SharedPreferences prefs;
-    private final static int REQUEST_OVERLAY_PERMISSION = 7657;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +35,19 @@ public class MainActivity extends AppCompatActivity {
         startService(new Intent(this, PointerService.class));
     }
 
+    public void cbClick(View v) {
+        prefs = getSharedPreferences("settings", MODE_PRIVATE);
+        CheckBox cb = (CheckBox) findViewById(R.id.checkBox);
+        prefs.edit().putBoolean("onBoot",cb.isChecked()).apply();
+    }
+
+    /**
+     * All code below for Marshmallow ONLY
+     * I don't know any Android stick/STB or even TV with Marshmallow, but maybe some day...
+     */
+
+    private final static int REQUEST_OVERLAY_PERMISSION = 7657; //Random value in lower 16 bits
+
     @TargetApi(23)
     public void requestOverlayPermission() {
         if (!Settings.canDrawOverlays(this)) {
@@ -52,14 +64,9 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == REQUEST_OVERLAY_PERMISSION) {
             if (Settings.canDrawOverlays(this))
                 startService(new Intent(this, PointerService.class));
-            //TODO: SYSTEM_ALERT_WINDOW permission denied
+            else
+                Toast.makeText(this, "Really? Permission denied? Fuck yourself then.", Toast.LENGTH_LONG).show();
         }
-    }
-
-    public void cbClick(View v) {
-        prefs = getSharedPreferences("settings", MODE_PRIVATE);
-        CheckBox cb = (CheckBox) findViewById(R.id.checkBox);
-        prefs.edit().putBoolean("onBoot",cb.isChecked()).apply();
     }
 
 }
