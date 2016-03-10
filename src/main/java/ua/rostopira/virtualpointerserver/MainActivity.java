@@ -27,12 +27,10 @@ public class MainActivity extends AppCompatActivity {
         }
 
         //Marshmallow permission system support
-        if ( (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) ) {
+        if ( (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) )
             requestOverlayPermission();
-            return;
-        }
-
-        startService(new Intent(this, PointerService.class));
+        else
+            startService(new Intent(this, PointerService.class));
     }
 
     public void cbClick(View v) {

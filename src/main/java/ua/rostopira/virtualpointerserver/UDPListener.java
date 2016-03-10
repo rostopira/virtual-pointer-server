@@ -5,44 +5,42 @@ import android.util.Log;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 
 /**
- * Listens for commands from client and does, what they say
- * Maybe should move message parse and commands execution to another file?
+ * Listens for commands from client (doInBackground) and does, what they say (onProgressUpdate)
  */
 public class UDPListener extends AsyncTask<Void, String, Void> {
-    private int x, y,
-                h, w; //screen size
+    private int x, y;
 
     @Override
-    protected void onPreExecute() {
-        super.onPreExecute();
-        h = S.get().screenSize.y;
-        w = S.get().screenSize.x;
-        x = w / 2;
-        y = h / 2;
+    public void onPreExecute() {
+        x = S.get().screenSize.x / 2;
+        y = S.get().screenSize.y / 2;
     }
 
     @Override
-    protected Void doInBackground(Void... voids) {
+    public Void doInBackground(Void... voids) {
         try {
-            DatagramSocket socket = new DatagramSocket();
-            byte[] buffer = new byte[1024];
+            DatagramSocket socket = new DatagramSocket(S.port, InetAddress.getByName("0.0.0.0"));
+            socket.setBroadcast(true);
+            byte[] buffer = new byte[32]; //Bigger - just overkill. Biggest message - M with 2 float
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
             while (!isCancelled()) {
                 socket.receive(packet);
                 String msg = new String(buffer, 0, packet.getLength());
-                if (msg.charAt(0)=='B') {
-                    //Detected client broadcast. Let him know, about running server here
-                    byte[] answer = "VPS here!".getBytes();
-                    socket.send(new DatagramPacket(
-                            answer,
-                            answer.length,
-                            packet.getAddress(),
-                            S.port)
+                if (msg.charAt(0)=='B')
+                    //Detected client broadcast. Answer
+                    new DatagramSocket().send(
+                        new DatagramPacket(
+                            "VPS here!".getBytes(),
+                            "VPS here!".length(),
+                            packet.getAddress(), //Address of broadcasting client
+                            S.port
+                        )
                     );
-                } else
-                    publishProgress(msg.split(" "));
+                else
+                    publishProgress(msg.split(" ")); //message parser
                 packet.setLength(buffer.length);
             }
             socket.close();
@@ -60,10 +58,10 @@ public class UDPListener extends AsyncTask<Void, String, Void> {
     protected void onProgressUpdate(String... message) {
         Log.d("Message parser", "Got " + message[0]);
         switch (message[0].charAt(0)) {
-            case 'M': //move
-                x += (int) Math.round(w*Math.sin(Double.parseDouble(message[1])));
-                y += (int) Math.round(h*Math.sin(Double.parseDouble(message[2])));
-                S.get().pointerService.overlayView.Update(x,y);
+            case 'M': //move cursor
+                x += (int) Math.round(S.get().screenSize.x*Math.sin(Double.parseDouble(message[1])));
+                y += (int) Math.round(S.get().screenSize.y*Math.sin(Double.parseDouble(message[2])));
+                S.get().overlayView.Update(x,y);
                 return;
             case 'T': //tap
                 SUInput("tap " + xy());
@@ -72,10 +70,9 @@ public class UDPListener extends AsyncTask<Void, String, Void> {
                 SUInput(String.format("swipe %s %s %d", xy(), xy(), S.get().longPress));
                 return;
             case 'C': //center
-                x = w / 2;
-                y = h / 2;
+                onPreExecute();
                 return;
-            case 'K': //custom key
+            case 'K': //any key
                 SUInput("keyevent " + message[1]);
                 return;
             default: //wtf?
@@ -84,13 +81,12 @@ public class UDPListener extends AsyncTask<Void, String, Void> {
     }
 
     /**
-     * Just to make code above more simple.
      * Formats x and y to string with space as seperator
      * Also, checks, if values in screen bounds.
      */
     private String xy() {
-        int X = (x < 0) ? 0 : (x > w) ? w : x;
-        int Y = (y < 0) ? 0 : (y > h) ? h : y;
+        int X = (x < 0) ? 0 : (x > S.get().screenSize.x) ? S.get().screenSize.x : x;
+        int Y = (y < 0) ? 0 : (y > S.get().screenSize.y) ? S.get().screenSize.y : y;
         return String.format("%d %d", X, Y);
     }
 
@@ -102,8 +98,7 @@ public class UDPListener extends AsyncTask<Void, String, Void> {
         try {
             Runtime.getRuntime().exec( new String[] {"su", "-c", "input " + s } );
         } catch (IOException e) {
-            Log.e("Message parser","I/O Exception");
-            Log.e("Message:", s);
+            Log.e("SUInput","I/O Exception on " + s);
         }
     }
 }

@@ -11,7 +11,7 @@ public class S extends Application {
     public static final int port = 6969;
     public int longPress;
     public Point screenSize;
-    public PointerService pointerService;
+    public OverlayView overlayView;
 
     public S() {
         super();
