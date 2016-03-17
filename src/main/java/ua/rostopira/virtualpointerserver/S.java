@@ -10,7 +10,7 @@ public class S extends Application {
     private static S instance;
     public static final int port = 6969;
     public int longPress;
-    public Point screenSize;
+    public Point screenSize = new Point();
     public OverlayView overlayView;
 
     public S() {
