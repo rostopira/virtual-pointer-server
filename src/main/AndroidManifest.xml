@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="ua.rostopira.virtualpointerserver"
     android:versionCode="1"
-    android:versionName="1.0">
+    android:versionName="0.1">
 
     <uses-sdk
         android:minSdkVersion="17"
@@ -11,10 +11,6 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-
-    <android:uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <android:uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <android:uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -41,15 +37,6 @@
         <service
             android:name=".PointerService"
             android:exported="false" />
-
-        <activity
-            android:name=".SettingsActivity"
-            android:label="@string/title_activity_settings"
-            android:parentActivityName=".MainActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="ua.rostopira.virtualpointerserver.MainActivity" />
-        </activity>
     </application>
 
 </manifest>

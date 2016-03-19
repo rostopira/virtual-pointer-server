@@ -3,6 +3,7 @@ package ua.rostopira.virtualpointerserver;
 import android.app.Service;
 import android.content.Intent;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.ViewConfiguration;
@@ -16,13 +17,15 @@ public class PointerService extends Service {
         super.onCreate();
 
         WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
-        wm.getDefaultDisplay().getRealSize(S.get().screenSize);
+        Point ss = new Point();
+        wm.getDefaultDisplay().getRealSize(ss);
         //Yeah, that's why support only 4.2+
         //Just joking. First Android HDMI stick was with 4.2.2
+        S.get().screenSize = ss;
 
         S.get().overlayView = new OverlayView(this);
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(
-            S.get().screenSize.x, S.get().screenSize.y,
+            ss.x, ss.y,
             WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
             WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE |

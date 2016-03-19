@@ -15,9 +15,10 @@ import android.view.View;
 public class OverlayView extends View {
     private boolean showCursor;
     private int x, y;
-    CountDownTimer timer; //for autohide
-    Bitmap cursor;
-    Paint paint;
+    private static int w, h; // Screen size
+    private CountDownTimer timer; //for autohide
+    private Bitmap cursor;
+    private Paint paint;
 
     public OverlayView(Context context) {
         super(context);
@@ -31,14 +32,16 @@ public class OverlayView extends View {
         showCursor = false;
         cursor = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_cursor);
         paint = new Paint();
+        w = S.get().screenSize.x;
+        h = S.get().screenSize.y;
     }
 
     public void Update(int X, int Y) {
         showCursor = true;
         timer.cancel();
         timer.start();
-        x = (X < 0) ? 0 : (x > S.get().screenSize.x) ? S.get().screenSize.x : x;
-        y = (Y < 0) ? 0 : (y > S.get().screenSize.y) ? S.get().screenSize.y : y;
+        x = (X < 0) ? 0 : (X > w) ? w : X;
+        y = (Y < 0) ? 0 : (Y > h) ? h : Y;
         postInvalidate();
     }
 

@@ -93,6 +93,7 @@ public class UDPListener extends AsyncTask<Void, String, Void> {
     /**
      * The simplest way to inject input events using root.
      * No gestures support. But it's for TV! Who cares?
+     * TODO: decrease executing delay
      */
     private void SUInput(String s) {
         try {
