@@ -19,8 +19,6 @@ public class PointerService extends Service {
         WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
         Point ss = new Point();
         wm.getDefaultDisplay().getRealSize(ss);
-        //Yeah, that's why support only 4.2+
-        //Just joking. First Android HDMI stick was with 4.2.2
         S.get().screenSize = ss;
 
         S.get().overlayView = new OverlayView(this);

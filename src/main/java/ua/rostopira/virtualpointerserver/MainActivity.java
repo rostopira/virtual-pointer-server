@@ -1,18 +1,19 @@
 package ua.rostopira.virtualpointerserver;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.support.v7.app.AppCompatActivity;
+//import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends Activity {
     private SharedPreferences prefs;
 
     @Override
@@ -41,7 +42,6 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * All code below for Marshmallow ONLY
-     * I don't know any Android stick/STB or even TV with Marshmallow, but maybe some day...
      */
 
     private final static int REQUEST_OVERLAY_PERMISSION = 7657; //Random value in lower 16 bits
