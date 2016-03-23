@@ -19,7 +19,7 @@ public class PointerService extends Service {
 
         //Root check
         if (!S.get().su.isPermitted()) {
-            Toast.makeText(this, "SU required. Grant acces and restart app", Toast.LENGTH_LONG);
+            Toast.makeText(this, "SU required. Grant access and restart app", Toast.LENGTH_LONG).show();
             //Commit suicide
             android.os.Process.killProcess(android.os.Process.myPid());
         }

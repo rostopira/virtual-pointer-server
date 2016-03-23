@@ -17,8 +17,8 @@ public class S extends Application {
 
     public S() {
         super();
-        instance = this;
         su = new SU();
+        instance = this;
     }
 
     // Double-checked singleton fetching
