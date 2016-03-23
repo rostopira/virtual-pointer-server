@@ -2,21 +2,19 @@ package ua.rostopira.virtualpointerserver;
 
 import android.os.AsyncTask;
 import android.util.Log;
-import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
 /**
- * Listens for commands from client (doInBackground) and does, what they say (onProgressUpdate)
+ * Listens for commands from client, (doInBackground) and pass them to Input Injector (onProgressUpdate)
  */
 public class UDPListener extends AsyncTask<Void, String, Void> {
-    private int x, y;
+    private MessageParser injector;
 
     @Override
     public void onPreExecute() {
-        x = S.get().screenSize.x / 2;
-        y = S.get().screenSize.y / 2;
+        injector = new MessageParser();
     }
 
     @Override
@@ -50,56 +48,9 @@ public class UDPListener extends AsyncTask<Void, String, Void> {
         return null;
     }
 
-    /**
-     * Simple message parser. No encryption, or anything else
-     * Just a letter and numbers. KISS
-     */
+
     @Override
     protected void onProgressUpdate(String... message) {
-        Log.d("Message parser", "Got " + message[0]);
-        switch (message[0].charAt(0)) {
-            case 'M': //move cursor
-                x += (int) Math.round(S.get().screenSize.x*Math.sin(Double.parseDouble(message[1])));
-                y += (int) Math.round(S.get().screenSize.y*Math.sin(Double.parseDouble(message[2])));
-                S.get().overlayView.Update(x,y);
-                return;
-            case 'T': //tap
-                SUInput("tap " + xy());
-                return;
-            case 'L': //longpress
-                SUInput(String.format("swipe %s %s %d", xy(), xy(), S.get().longPress));
-                return;
-            case 'C': //center
-                onPreExecute();
-                return;
-            case 'K': //any key
-                SUInput("keyevent " + message[1]);
-                return;
-            default: //wtf?
-                Log.e("Message parser", "Message missed: " + message[0]);
-        }
-    }
-
-    /**
-     * Formats x and y to string with space as seperator
-     * Also, checks, if values in screen bounds.
-     */
-    private String xy() {
-        int X = (x < 0) ? 0 : (x > S.get().screenSize.x) ? S.get().screenSize.x : x;
-        int Y = (y < 0) ? 0 : (y > S.get().screenSize.y) ? S.get().screenSize.y : y;
-        return String.format("%d %d", X, Y);
-    }
-
-    /**
-     * The simplest way to inject input events using root.
-     * No gestures support. But it's for TV! Who cares?
-     * TODO: decrease executing delay
-     */
-    private void SUInput(String s) {
-        try {
-            Runtime.getRuntime().exec( new String[] {"su", "-c", "input " + s } );
-        } catch (IOException e) {
-            Log.e("SUInput","I/O Exception on " + s);
-        }
+        injector.exec(message);
     }
 }

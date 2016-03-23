@@ -1,8 +1,4 @@
 buildscript {
-    repositories {
-        jcenter() // or mavenCentral()
-    }
-
     dependencies {
         classpath 'com.android.tools.build:gradle:2.1.0-alpha3'
     }
@@ -27,8 +23,4 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-}
-
-dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
 }
