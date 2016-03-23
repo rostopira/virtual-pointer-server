@@ -51,8 +51,8 @@ public class MessageParser {
      * Also, checks, if values in screen bounds.
      */
     private String xyToString(float x, float y) {
-    int X = Math.round( (x < 0) ? 0 : (x > S.get().screenSize.x) ? S.get().screenSize.x : x );
-    int Y = Math.round( (y < 0) ? 0 : (y > S.get().screenSize.y) ? S.get().screenSize.y : y );
-    return String.format("%d %d", X, Y);
+        int X = Math.round( (x < 0) ? 0 : (x > S.get().screenSize.x) ? S.get().screenSize.x : x );
+        int Y = Math.round( (y < 0) ? 0 : (y > S.get().screenSize.y) ? S.get().screenSize.y : y );
+        return String.format("%d %d", X, Y);
     }
 }

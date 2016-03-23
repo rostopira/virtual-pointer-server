@@ -21,7 +21,7 @@ public class SU {
     public void DO(String s) {
         if (isPermitted())
             try {
-                shell.writeBytes(s);
+                shell.writeBytes(s+"\n");
                 shell.flush();
             } catch (IOException e) {
                 Log.e("SU.DO", "IOException");
